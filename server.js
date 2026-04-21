@@ -4,18 +4,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 
-// 1. Landing Page (The "Fancy" Welcome)
+// 1. Landing Page
 app.get('/', (req, res) => {
     res.send(`
         <body style="background: #0f172a; color: #38bdf8; font-family: sans-serif; text-align: center; padding-top: 100px;">
             <h1 style="font-size: 3rem;">Welcome</h1>
             <p style="color: #94a3b8;">Nothing to see here. Move along.</p>
-            </body>
+        </body>
     `);
 });
 
-// 2. The "About" page (Hidden - ffuf should find /assets or /info)
-// Using 'assets' as it is a very common wordlist hit
+// 2. The "About" page (Hidden - ffuf should find /assets)
+// Removed the bolding so the student has to guess which email to use
 app.get('/assets', (req, res) => {
     res.send(`
         <div style="font-family: monospace; padding: 20px;">
@@ -23,12 +23,12 @@ app.get('/assets', (req, res) => {
             <hr>
             <p>Support: tech_support@lab.internal</p>
             <p>Dev: dev_trent@lab.internal</p>
-            <p>Backup Access: <b>temp_visitor</b>@lab.internal</p>
+            <p>Backup Access: temp_visitor@lab.internal</p>
         </div>
     `);
 });
 
-// 3. The Login Page (Hidden - ffuf should find /portal or /console)
+// 3. The Login Page (Hidden - ffuf should find /portal)
 app.get('/portal', (req, res) => {
     res.send(`
         <body style="font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f3f4f6;">
@@ -46,11 +46,12 @@ app.get('/portal', (req, res) => {
 app.post('/portal', (req, res) => {
     const { user, pass } = req.body;
     
-    // Crackable password: 'password123' or 'superman'
-    if (user === 'temp_visitor' && pass === 'password123') {
+    // Username: temp_visitor
+    // Password: 123456 (This is usually the #1 hit in rockyou.txt)
+    if (user === 'temp_visitor' && pass === '123456') {
         res.send(`<h1 style="color: green;">SUCCESS</h1><p>The Flag is: <b>FLAG{FUZZ_AND_CRACK_MASTER}</b></p>`);
     } else {
-        // We return a 401 status so Hydra knows the attempt failed
+        // Essential for Hydra to detect a 'fail'
         res.status(401).send("Login failed: Invalid credentials.");
     }
 });
